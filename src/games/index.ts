@@ -28,7 +28,7 @@ export function buildAdapters(servers: Iterable<ServerConfig>): Map<string, Game
       const adapter = build(server);
       if (adapter) adapters.set(server.key, adapter);
     } catch (err) {
-      throw new Error(`Serveur « ${server.key} » : ${(err as Error).message}`);
+      throw new Error(`Server "${server.key}": ${(err as Error).message}`);
     }
   }
   return adapters;

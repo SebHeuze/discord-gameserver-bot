@@ -59,11 +59,11 @@ servers:
       "111111111111111111": [supprimer]
 `),
       ),
-    ).toThrow(/config\.yaml invalide/);
+    ).toThrow(/invalid config\.yaml/);
   });
 
   it('refuse un fichier sans serveur', () => {
-    expect(() => loadConfig(write('servers: {}\n'))).toThrow(/aucun serveur/);
+    expect(() => loadConfig(write('servers: {}\n'))).toThrow(/declares no server/);
   });
 });
 
@@ -84,7 +84,7 @@ ${extra}
       type: rcon`),
         ),
       ),
-    ).toThrow(/demande un bloc/);
+    ).toThrow(/requires an/);
   });
 
   it('refuse une interrogation par RCON avec un dialecte muet', () => {

@@ -19,7 +19,7 @@ export async function describe(
   try {
     return { state, players: await adapter.query() };
   } catch (err) {
-    log.debug(`${server.key} injoignable`, (err as Error).message);
+    log.debug(`${server.key} unreachable`, (err as Error).message);
     return { state, error: (err as Error).message };
   }
 }
@@ -32,7 +32,7 @@ export async function handleServers(
   const servers = visibleServers(member, ctx.config);
   if (servers.length === 0) {
     await interaction.reply({
-      content: "Tu n'as accès à aucun serveur. Demande le rôle correspondant.",
+      content: "You don't have access to any server. Ask for the matching role.",
       flags: MessageFlags.Ephemeral,
     });
     return;
@@ -65,7 +65,7 @@ export async function handlePlayers(
 ): Promise<void> {
   const adapter = ctx.adapters.get(server.key);
   if (!adapter?.query) {
-    await interaction.editReply(`**${title(server)}** ne sait pas dire qui est connecté.`);
+    await interaction.editReply(`**${title(server)}** can't report who is online.`);
     return;
   }
 
@@ -74,17 +74,17 @@ export async function handlePlayers(
     players = await adapter.query();
   } catch {
     await interaction.editReply(
-      `**${title(server)}** ne répond pas — il est éteint, ou pas encore prêt.`,
+      `**${title(server)}** isn't answering — it's off, or not ready yet.`,
     );
     return;
   }
 
   if (players.online === 0) {
-    await interaction.editReply(`**${title(server)}** : personne de connecté.`);
+    await interaction.editReply(`**${title(server)}**: nobody online.`);
     return;
   }
 
   const count = players.max === undefined ? `${players.online}` : `${players.online}/${players.max}`;
   const names = players.names?.length ? `\n> ${players.names.join(', ')}` : '';
-  await interaction.editReply(`**${title(server)}** : ${count} connecté(s).${names}`);
+  await interaction.editReply(`**${title(server)}**: ${count} online.${names}`);
 }

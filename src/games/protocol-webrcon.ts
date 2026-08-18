@@ -30,7 +30,7 @@ export function webrconExec(
     };
 
     const guard = setTimeout(
-      () => done(new Error(`WebRCON ${options.host}:${options.port} : pas de réponse en ${timeoutMs} ms`)),
+      () => done(new Error(`WebRCON ${options.host}:${options.port}: no answer within ${timeoutMs} ms`)),
       timeoutMs,
     );
 

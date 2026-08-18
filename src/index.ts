@@ -14,7 +14,7 @@ async function main(): Promise<void> {
   setLevel(env.LOG_LEVEL);
 
   const config = loadConfig(env.CONFIG_PATH);
-  log.info(`${config.servers.size} serveur(s) déclaré(s) : ${[...config.servers.keys()].join(', ')}`);
+  log.info(`${config.servers.size} server(s) declared: ${[...config.servers.keys()].join(', ')}`);
 
   const komodo = new Komodo(
     env.KOMODO_URL,
@@ -43,15 +43,15 @@ async function main(): Promise<void> {
       body: definitions,
     });
     await ctx.audit.init();
-    log.info(`connecté en ${ready.user.tag}, commandes enregistrées sur ${env.DISCORD_GUILD_ID}`);
+    log.info(`logged in as ${ready.user.tag}, commands registered on ${env.DISCORD_GUILD_ID}`);
   });
 
   client.on(Events.InteractionCreate, (interaction) => void onInteraction(ctx, interaction));
-  client.on(Events.Error, (err) => log.error('erreur discord.js', err));
+  client.on(Events.Error, (err) => log.error('discord.js error', err));
 
   for (const signal of ['SIGINT', 'SIGTERM'] as const) {
     process.on(signal, () => {
-      log.info(`${signal} reçu, fermeture`);
+      log.info(`${signal} received, shutting down`);
       void client.destroy().then(() => process.exit(0));
     });
   }
@@ -60,6 +60,6 @@ async function main(): Promise<void> {
 }
 
 main().catch((err: unknown) => {
-  log.error('démarrage impossible', err);
+  log.error('startup failed', err);
   process.exit(1);
 });

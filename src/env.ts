@@ -27,7 +27,7 @@ export type Env = z.infer<typeof schema>;
 export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
   const parsed = schema.safeParse(source);
   if (!parsed.success) {
-    throw new Error(`Environnement incomplet :\n${z.prettifyError(parsed.error)}`);
+    throw new Error(`incomplete environment:\n${z.prettifyError(parsed.error)}`);
   }
   return parsed.data;
 }

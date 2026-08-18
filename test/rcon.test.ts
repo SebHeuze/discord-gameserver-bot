@@ -77,7 +77,7 @@ describe('rconExec', () => {
     running = server;
     await expect(
       rconExec({ host: '127.0.0.1', port, password: 'faux' }, ['x']),
-    ).rejects.toThrow(/mot de passe refusé/);
+    ).rejects.toThrow(/password rejected/);
   });
 
   it('abandonne sur un serveur muet plutôt que de rester pendu', async () => {
@@ -90,6 +90,6 @@ describe('rconExec', () => {
     const port = typeof address === 'object' && address ? address.port : 0;
     await expect(
       rconExec({ host: '127.0.0.1', port, password: 'secret', timeoutMs: 200 }, ['x']),
-    ).rejects.toThrow(/pas de réponse/);
+    ).rejects.toThrow(/no answer/);
   });
 });

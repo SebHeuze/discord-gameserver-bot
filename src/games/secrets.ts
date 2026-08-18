@@ -23,7 +23,7 @@ export function resolveSecret(ref: SecretRef, env: NodeJS.ProcessEnv = process.e
   const match = new RegExp(`${ref.key}\\s*=\\s*"([^"]*)"`).exec(contents);
   if (!match?.[1]) {
     throw new Error(
-      `${ref.key} absent ou vide dans ${ref.from_ini} — le RCON du serveur est-il configuré ?`,
+      `${ref.key} missing or empty in ${ref.from_ini} — is the server's RCON configured?`,
     );
   }
   return match[1];

@@ -16,11 +16,11 @@ import { handlePlayers, handleServers, handleStatus } from './info.js';
 import { handlePower, isPowerAction, REFUSED } from './power.js';
 
 const COMMAND_ACTIONS: Record<string, Action> = {
-  etat: 'status',
-  joueurs: 'players',
-  demarrer: 'start',
-  arreter: 'stop',
-  redemarrer: 'restart',
+  status: 'status',
+  players: 'players',
+  start: 'start',
+  stop: 'stop',
+  restart: 'restart',
 };
 
 export async function onInteraction(ctx: Context, interaction: Interaction): Promise<void> {
@@ -29,7 +29,7 @@ export async function onInteraction(ctx: Context, interaction: Interaction): Pro
     else if (interaction.isChatInputCommand()) await onCommand(ctx, interaction);
     else if (interaction.isButton()) await onButton(ctx, interaction);
   } catch (err) {
-    log.error('interaction non traitée', err);
+    log.error('unhandled interaction', err);
   }
 }
 
@@ -51,13 +51,13 @@ async function onCommand(ctx: Context, interaction: ChatInputCommandInteraction)
   const member = memberOf(interaction);
   if (!member) {
     await interaction.reply({
-      content: 'Cette commande ne fonctionne que depuis le serveur Discord.',
+      content: 'This command only works from inside the Discord server.',
       flags: MessageFlags.Ephemeral,
     });
     return;
   }
 
-  if (interaction.commandName === 'serveurs') {
+  if (interaction.commandName === 'servers') {
     await handleServers(ctx, interaction, member);
     return;
   }
@@ -71,7 +71,7 @@ async function onCommand(ctx: Context, interaction: ChatInputCommandInteraction)
       userTag: interaction.user.username,
       action: interaction.commandName,
       server: optionServer(interaction) ?? '—',
-      outcome: 'refusé',
+      outcome: 'denied',
     });
     return;
   }
@@ -102,9 +102,9 @@ async function onButton(ctx: Context, interaction: ButtonInteraction): Promise<v
       await ctx.audit.record({
         userId: member.id,
         userTag: interaction.user.username,
-        action: `bouton ${rawAction}`,
+        action: `button ${rawAction}`,
         server: key,
-        outcome: 'refusé',
+        outcome: 'denied',
       });
     }
     return;

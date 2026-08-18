@@ -35,7 +35,7 @@ Conséquences voulues :
   précisément le raccourci qui rend DockerDiscordControl inutilisable pour cet
   usage : chez lui, un salon de contrôle donne accès à tous les conteneurs ;
 - un serveur auquel on n'a aucun droit n'apparaît nulle part : ni dans
-  `/serveurs`, ni dans l'autocomplétion, et une commande le visant répond la
+  `/servers`, ni dans l'autocomplétion, et une commande le visant répond la
   même chose qu'un serveur inexistant ;
 - les boutons repassent par le même contrôle que les commandes, à chaque clic.
 
@@ -45,12 +45,14 @@ Chaque tentative, acceptée comme refusée, part dans un salon d'audit privé.
 
 | Commande | Action requise |
 |---|---|
-| `/serveurs` | — (liste ce à quoi on a droit) |
-| `/etat <serveur>` | `status` |
-| `/joueurs <serveur>` | `players` |
-| `/demarrer <serveur>` | `start` |
-| `/arreter <serveur>` | `stop` |
-| `/redemarrer <serveur>` | `restart` |
+| `/servers` | — (liste ce à quoi on a droit) |
+| `/status <server>` | `status` |
+| `/players <server>` | `players` |
+| `/start <server>` | `start` |
+| `/stop <server>` | `stop` |
+| `/restart <server>` | `restart` |
+
+L'interface du bot est en anglais ; ce dépôt reste commenté en français.
 
 Un arrêt sur un serveur peuplé demande une confirmation explicite, prévient
 les joueurs en jeu, puis force une sauvegarde avant de couper.
@@ -91,7 +93,7 @@ d'un jeu à l'autre. D'où un second bloc, facultatif, avec deux transports
 | `generic` | — | — |
 
 Un serveur sans bloc `rcon` reste pilotable : l'arrêt est simplement plus sec.
-Un serveur sans `query` reste pilotable aussi, seul `/joueurs` lui manque.
+Un serveur sans `query` reste pilotable aussi, seul `/players` lui manque.
 
 Deux cas méritent un mot :
 
@@ -145,7 +147,7 @@ CONFIG_PATH=./config.yaml npm start
 Le bot refuse de démarrer si la configuration est invalide, si un secret de jeu
 est introuvable, ou si une stack déclarée est hors du périmètre de la clé
 Komodo. C'est délibéré : mieux vaut ne pas démarrer que découvrir le problème
-au premier `/demarrer` d'un ami.
+au premier `/start` d'un ami.
 
 ## Livraison
 

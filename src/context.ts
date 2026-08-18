@@ -40,6 +40,6 @@ export function serverFor(
 }
 
 export function optionServer(interaction: ChatInputCommandInteraction): string | null {
-  const option = interaction.options.get('serveur');
+  const option = interaction.options.get('server');
   return typeof option?.value === 'string' ? option.value : null;
 }

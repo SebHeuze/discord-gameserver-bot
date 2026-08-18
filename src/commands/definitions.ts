@@ -2,33 +2,33 @@ import { SlashCommandBuilder, type SlashCommandStringOption } from 'discord.js';
 
 const serverOption = (option: SlashCommandStringOption): SlashCommandStringOption =>
   option
-    .setName('serveur')
-    .setDescription('Le serveur de jeu')
+    .setName('server')
+    .setDescription('The game server')
     .setRequired(true)
     .setAutocomplete(true);
 
 export const definitions = [
   new SlashCommandBuilder()
-    .setName('serveurs')
-    .setDescription('Liste les serveurs auxquels tu as accès'),
+    .setName('servers')
+    .setDescription('List the servers you have access to'),
   new SlashCommandBuilder()
-    .setName('etat')
-    .setDescription("État d'un serveur")
+    .setName('status')
+    .setDescription('Status of a server')
     .addStringOption(serverOption),
   new SlashCommandBuilder()
-    .setName('joueurs')
-    .setDescription('Qui est connecté sur un serveur')
+    .setName('players')
+    .setDescription("Who's online on a server")
     .addStringOption(serverOption),
   new SlashCommandBuilder()
-    .setName('demarrer')
-    .setDescription('Démarre un serveur')
+    .setName('start')
+    .setDescription('Start a server')
     .addStringOption(serverOption),
   new SlashCommandBuilder()
-    .setName('arreter')
-    .setDescription('Arrête un serveur')
+    .setName('stop')
+    .setDescription('Stop a server')
     .addStringOption(serverOption),
   new SlashCommandBuilder()
-    .setName('redemarrer')
-    .setDescription('Redémarre un serveur')
+    .setName('restart')
+    .setDescription('Restart a server')
     .addStringOption(serverOption),
 ].map((command) => command.toJSON());

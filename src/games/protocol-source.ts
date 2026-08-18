@@ -78,7 +78,7 @@ export function rconExec(options: RconOptions, commands: readonly string[]): Pro
 
     // Après `done`, qui le référence : rien ne l'appelle avant la connexion.
     const guard = setTimeout(
-      () => done(new Error(`RCON ${options.host}:${options.port} : pas de réponse en ${timeoutMs} ms`)),
+      () => done(new Error(`RCON ${options.host}:${options.port}: no answer within ${timeoutMs} ms`)),
       timeoutMs,
     );
 
@@ -101,7 +101,7 @@ export function rconExec(options: RconOptions, commands: readonly string[]): Pro
 
     socket.setNoDelay(true);
     socket.on('error', (err) => done(err));
-    socket.on('close', () => done(settled ? undefined : new Error('connexion RCON fermée par le serveur')));
+    socket.on('close', () => done(settled ? undefined : new Error('RCON connection closed by the server')));
 
     socket.on('data', (chunk) => {
       buffer = Buffer.concat([buffer, chunk]);
@@ -113,7 +113,7 @@ export function rconExec(options: RconOptions, commands: readonly string[]): Pro
           if (packet.type !== AUTH_RESPONSE) continue;
           // Mot de passe refusé : id à -1.
           if (packet.id === -1) {
-            done(new Error('RCON : mot de passe refusé'));
+            done(new Error('RCON: password rejected'));
             return;
           }
           next();

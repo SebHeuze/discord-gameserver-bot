@@ -8,10 +8,10 @@ import type { MemberLike } from '../permissions.js';
 import { confirmStop, title } from '../ui.js';
 import { describe } from './info.js';
 
-const VERBS: Record<'start' | 'stop' | 'restart', string> = {
-  start: 'démarrage',
-  stop: 'arrêt',
-  restart: 'redémarrage',
+const NOUNS: Record<'start' | 'stop' | 'restart', string> = {
+  start: 'Startup',
+  stop: 'Shutdown',
+  restart: 'Restart',
 };
 
 export async function handlePower(
@@ -20,9 +20,9 @@ export async function handlePower(
   member: MemberLike,
   server: ServerConfig,
   action: 'start' | 'stop' | 'restart',
-  options: { confirmed?: boolean; userTag: string } = { userTag: 'inconnu' },
+  options: { confirmed?: boolean; userTag: string } = { userTag: 'unknown' },
 ): Promise<void> {
-  const audit = (outcome: 'ok' | 'refusé' | 'erreur', detail?: string): Promise<void> =>
+  const audit = (outcome: 'ok' | 'denied' | 'error', detail?: string): Promise<void> =>
     ctx.audit.record({
       userId: member.id,
       userTag: options.userTag,
@@ -34,14 +34,14 @@ export async function handlePower(
 
   const left = ctx.locks.cooldownLeft(member.id, server.key);
   if (left > 0) {
-    await interaction.editReply(`Doucement : attends ${left} s avant de rejouer sur ce serveur.`);
-    await audit('refusé', `cooldown ${left} s`);
+    await interaction.editReply(`Easy — wait ${left}s before acting on this server again.`);
+    await audit('denied', `cooldown ${left} s`);
     return;
   }
 
   if (!ctx.locks.acquire(server.key)) {
-    await interaction.editReply(`Une action est déjà en cours sur **${title(server)}**.`);
-    await audit('refusé', 'action concurrente');
+    await interaction.editReply(`An action is already running on **${title(server)}**.`);
+    await audit('denied', 'concurrent action');
     return;
   }
 
@@ -52,23 +52,23 @@ export async function handlePower(
       const players = await adapter.query().catch(() => undefined);
       if (players && players.online > 0) {
         await interaction.editReply({
-          content: `**${title(server)}** : ${players.online} joueur(s) connecté(s)${
-            players.names?.length ? ` (${players.names.join(', ')})` : ''
-          }.`,
+          content: `**${title(server)}**: ${players.online} player${
+            players.online > 1 ? 's' : ''
+          } online${players.names?.length ? ` (${players.names.join(', ')})` : ''}.`,
           components: confirmStop(server, players.online),
         });
-        await audit('refusé', 'confirmation demandée');
+        await audit('denied', 'confirmation requested');
         return;
       }
     }
 
     if (action === 'stop' && adapter) {
-      const message = `Arret du serveur demande par ${options.userTag}`;
+      const message = `Server shutdown requested by ${options.userTag}`;
       await adapter.announce?.(message).catch((err: Error) =>
-        log.warn(`${server.key} : annonce impossible`, err.message),
+        log.warn(`${server.key}: announce failed`, err.message),
       );
       await adapter.save?.().catch((err: Error) =>
-        log.warn(`${server.key} : sauvegarde impossible`, err.message),
+        log.warn(`${server.key}: save failed`, err.message),
       );
     }
 
@@ -77,19 +77,19 @@ export async function handlePower(
     await audit('ok');
 
     if (action === 'stop') {
-      await interaction.editReply(`**${title(server)}** : arrêt demandé. ⏹️`);
+      await interaction.editReply(`**${title(server)}**: shutdown requested. ⏹️`);
       return;
     }
 
     await interaction.editReply(
-      `**${title(server)}** : ${VERBS[action]} lancé. Ça peut prendre plusieurs minutes ` +
-        `(mise à jour du jeu au démarrage), je préviens ici dès qu'il répond.`,
+      `**${title(server)}**: ${NOUNS[action].toLowerCase()} under way. This can take several ` +
+        `minutes (the game updates as it boots); I'll post here as soon as it answers.`,
     );
     void announceWhenReady(ctx, interaction, member, server);
   } catch (err) {
     log.error(`${action} ${server.key}`, err);
-    await interaction.editReply(`Échec du ${VERBS[action]} de **${title(server)}**.`);
-    await audit('erreur', (err as Error).message);
+    await interaction.editReply(`${NOUNS[action]} of **${title(server)}** failed.`);
+    await audit('error', (err as Error).message);
   } finally {
     ctx.locks.release(server.key);
   }
@@ -121,7 +121,7 @@ async function announceWhenReady(
     await new Promise((resolve) => setTimeout(resolve, 15_000));
     try {
       await adapter.query();
-      await say(`<@${member.id}> **${title(server)}** est prêt. ✅`);
+      await say(`<@${member.id}> **${title(server)}** is ready. ✅`);
       return;
     } catch {
       // pas encore prêt
@@ -130,8 +130,8 @@ async function announceWhenReady(
 
   const { state } = await describe(ctx, server);
   await say(
-    `<@${member.id}> **${title(server)}** ne répond toujours pas après ` +
-      `${Math.round(timeout / 60)} min (état Docker : ${state}).`,
+    `<@${member.id}> **${title(server)}** still isn't answering after ` +
+      `${Math.round(timeout / 60)} min (Docker state: ${state}).`,
   );
 }
 
@@ -141,5 +141,5 @@ export function isPowerAction(action: Action): action is 'start' | 'stop' | 'res
 
 export const REFUSED = {
   flags: MessageFlags.Ephemeral,
-  content: "Serveur inconnu, ou tu n'as pas le droit d'y toucher.",
+  content: "Unknown server, or you're not allowed to touch it.",
 } as const;

@@ -53,7 +53,7 @@ export class Komodo {
     const body = await response.body.text();
     if (response.statusCode !== 200) {
       // Sans le corps, un refus de permission ressemble à une panne réseau.
-      throw new Error(`Komodo ${type} : HTTP ${response.statusCode} — ${body.slice(0, 300)}`);
+      throw new Error(`Komodo ${type}: HTTP ${response.statusCode} — ${body.slice(0, 300)}`);
     }
     return JSON.parse(body) as T;
   }
@@ -63,8 +63,8 @@ export class Komodo {
     const missing = stacks.filter((stack) => !known.has(stack));
     if (missing.length > 0) {
       throw new Error(
-        `Stacks inaccessibles depuis cette clé Komodo : ${missing.join(', ')}. ` +
-          'Vérifier les permissions du Service User (Read + Execute sur ces stacks).',
+        `Stacks unreachable with this Komodo key: ${missing.join(', ')}. ` +
+          'Check the Service User permissions (Execute on these stacks).',
       );
     }
   }
@@ -76,7 +76,7 @@ export class Komodo {
 
   async state(stack: string): Promise<StackState> {
     const found = (await this.list()).find((item) => item.name === stack);
-    if (!found) throw new Error(`Stack ${stack} introuvable`);
+    if (!found) throw new Error(`Stack ${stack} not found`);
     return found.info.state;
   }
 
@@ -88,7 +88,7 @@ export class Komodo {
    *  après un `down`, il faut `DeployStack` (compose up). */
   async start(stack: string): Promise<void> {
     if ((await this.state(stack)) === 'down') {
-      log.info(`${stack} est down → DeployStack`);
+      log.info(`${stack} is down → DeployStack`);
       await this.call('/execute', 'DeployStack', { stack });
       return;
     }

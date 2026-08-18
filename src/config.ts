@@ -8,7 +8,7 @@ export const ACTIONS = ['status', 'players', 'start', 'stop', 'restart'] as cons
 export type Action = (typeof ACTIONS)[number];
 
 const action = z.enum(ACTIONS);
-const snowflake = z.string().regex(/^\d{17,20}$/, 'ID Discord invalide');
+const snowflake = z.string().regex(/^\d{17,20}$/, 'invalid Discord ID');
 
 /** Aucun secret n'est écrit dans le YAML. Le lire dans le fichier du jeu
  *  évite de dupliquer une valeur que celui-ci génère lui-même. */
@@ -80,14 +80,14 @@ const server = z
     users: z.record(snowflake, z.array(action)).default({}),
   })
   .check((ctx) => {
-    // Dit au chargement, plutôt qu'au premier /joueurs, qu'il ne sortira rien.
+    // Dit au chargement, plutôt qu'au premier /players, qu'il ne sortira rien.
     if (ctx.value.query.type !== 'rcon') return;
     if (!ctx.value.rcon) {
       ctx.issues.push({
         code: 'custom',
         input: ctx.value,
         path: ['query'],
-        message: "query.type « rcon » demande un bloc « rcon »",
+        message: 'query.type "rcon" requires an "rcon" block',
       });
       return;
     }
@@ -96,7 +96,7 @@ const server = z
         code: 'custom',
         input: ctx.value,
         path: ['rcon', 'dialect'],
-        message: "le dialecte « generic » ne sait pas lister les joueurs",
+        message: 'the "generic" dialect cannot list players',
       });
     }
   });
@@ -121,7 +121,7 @@ export type Config = {
 function fromBigInt(value: unknown): unknown {
   if (typeof value === 'bigint') {
     if (value > BigInt(Number.MAX_SAFE_INTEGER)) {
-      throw new Error(`Entier hors limites dans config.yaml : ${value}`);
+      throw new Error(`Integer out of range in config.yaml: ${value}`);
     }
     return Number(value);
   }
@@ -136,12 +136,12 @@ export function loadConfig(path: string): Config {
   const raw = fromBigInt(parse(readFileSync(path, 'utf8'), { intAsBigInt: true }));
   const parsed = configSchema.safeParse(raw);
   if (!parsed.success) {
-    throw new Error(`config.yaml invalide :\n${z.prettifyError(parsed.error)}`);
+    throw new Error(`invalid config.yaml:\n${z.prettifyError(parsed.error)}`);
   }
   const servers = new Map<string, ServerConfig>(
     Object.entries(parsed.data.servers).map(([key, value]) => [key, { ...value, key }]),
   );
-  if (servers.size === 0) throw new Error('config.yaml ne déclare aucun serveur');
+  if (servers.size === 0) throw new Error('config.yaml declares no server');
   return {
     cooldownSeconds: parsed.data.cooldown_seconds,
     startupTimeoutSeconds: parsed.data.startup_timeout_seconds,
