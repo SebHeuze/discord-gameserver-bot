@@ -1,0 +1,35 @@
+# Le tag `main` est mouvant : c'est le digest qui identifie la version, et que
+# Renovate suit à travers le proxy cache Harbor.
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # En minuscules : ghcr.io refuse la casse mixte de `github.repository`.
+      - uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: |
+            ghcr.io/sebheuze/discord-gameserver-bot:main
+            ghcr.io/sebheuze/discord-gameserver-bot:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

@@ -1,0 +1,7 @@
+node_modules/
+dist/
+*.log
+
+# Config locale : de vrais IDs Discord. Seul l'exemple est versionné.
+config.yaml
+.env

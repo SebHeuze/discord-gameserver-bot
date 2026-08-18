@@ -1,0 +1,22 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", ":dependencyDashboard"],
+  "description": [
+    "Même politique que komodo-config : une semaine de quarantaine, patch et",
+    "minor fusionnés seuls, majeures soumises à la Dependency Dashboard.",
+    "Le repo est scanné par l'instance Renovate self-hosted du homelab, qui",
+    "exige un renovate.json (requireConfig: 'required')."
+  ],
+  "minimumReleaseAge": "7 days",
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["patch", "minor"],
+      "automerge": true
+    },
+    {
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "dependencyDashboardApproval": true
+    }
+  ]
+}

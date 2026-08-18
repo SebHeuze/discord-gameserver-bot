@@ -1,0 +1,114 @@
+# Modèle du config.yaml. Le fichier réel est versionné dans komodo-config
+# (stacks/discord-gamebot/) et monté en lecture seule sur /app/config.yaml.
+#
+# Refus par défaut : une action n'est possible que si un rôle porté par
+# l'appelant, ou une exception à son nom, la lui accorde. Ajouter un ami ne
+# demande donc aucun commit, seulement un rôle dans Discord.
+#
+# Actions : status, players, start, stop, restart.
+# Par serveur, deux blocs indépendants et facultatifs : `query` pour lire
+# (GameDig, 358 jeux), `rcon` pour écrire (annonce et sauvegarde).
+
+cooldown_seconds: 60
+# Plafond d'attente avant de renoncer à annoncer un serveur « prêt ». Chaque
+# serveur peut le surcharger.
+startup_timeout_seconds: 1800
+
+servers:
+  palworld:
+    label: Palworld
+    emoji: "🦖"
+    stack: game-palworld
+    query:
+      # L'API REST donne les pseudos *et* la limite, là où le RCON ne donne
+      # que les pseudos. Demande RESTAPIEnabled=True ; sinon, `type: rcon`.
+      type: gamedig
+      game: palworld
+      host: Palworld          # nom du conteneur sur homenet
+      port: 8212
+      username: admin
+      password:
+        from_ini: /secrets/palworld/PalWorldSettings.ini
+        key: AdminPassword
+    rcon:
+      dialect: palworld       # Broadcast … / Save
+      host: Palworld
+      port: 25575
+      password:
+        from_ini: /secrets/palworld/PalWorldSettings.ini
+        key: AdminPassword
+    roles:
+      "111111111111111111": [status, players, start, restart]
+      "222222222222222222": [status, players, start, stop, restart]
+    users:
+      "333333333333333333": [stop]
+
+  factorio:
+    label: Factorio
+    emoji: "🏭"
+    stack: game-factorio
+    # Pas de SteamCMD : le serveur est prêt en quelques secondes.
+    startup_timeout_seconds: 120
+    query:
+      # RCON local et non GameDig, qui n'interroge Factorio qu'à travers le
+      # matchmaking public de l'éditeur — serveur publié et sortie Internet.
+      type: rcon
+    rcon:
+      dialect: factorio       # /players online, /server-save
+      host: Factorio
+      port: 27015
+      password:
+        # Tiré au sort par l'image au premier démarrage.
+        from_file: /secrets/factorio/rconpw
+    roles:
+      "111111111111111111": [status, players, start, restart]
+
+  rust:
+    label: Rust
+    emoji: "🔫"
+    stack: game-rust
+    # Une dizaine de gigaoctets vérifiés par SteamCMD à chaque démarrage.
+    startup_timeout_seconds: 3600
+    query:
+      # A2S sur le port de requête : aucun mot de passe.
+      type: gamedig
+      game: rust
+      host: RUST
+      port: 28016
+    rcon:
+      # Rust parle WebRCON : WebSocket, mot de passe dans le chemin.
+      protocol: webrcon
+      dialect: rust
+      host: RUST
+      port: 28017
+      password:
+        from_env: RUST_RCON_PASSWORD
+    roles:
+      "222222222222222222": [status, players, start, stop, restart]
+
+  satisfactory:
+    label: Satisfactory
+    emoji: "🏗️"
+    stack: game-satisfactory
+    query:
+      # Requête UDP puis API HTTPS en connexion anonyme : aucun jeton à
+      # générer. Donne un compteur, jamais les pseudos.
+      type: gamedig
+      game: satisfactory
+      host: Satisfactory
+      port: 7777
+    roles:
+      "111111111111111111": [status, players, start, restart]
+
+  # Tout autre jeu de la liste GameDig se déclare de même :
+  # https://github.com/gamedig/node-gamedig/blob/master/GAMES_LIST.md
+  #
+  # minecraft:
+  #   label: Minecraft
+  #   stack: game-minecraft
+  #   query:
+  #     type: gamedig
+  #     game: minecraft
+  #     host: Minecraft      # port omis : GameDig connaît celui du jeu
+  #   roles:
+  #     "111111111111111111": [status, players, start, restart]
